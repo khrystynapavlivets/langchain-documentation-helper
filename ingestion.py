@@ -4,16 +4,14 @@ import os
 import certifi
 from dotenv import load_dotenv
 
-# from langchain_chroma import Chroma  # Not used - using Pinecone instead
+
+from langchain_chroma import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-
-# from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_tavily import TavilyCrawl, TavilyExtract, TavilyMap
 from logger import Colors, log_info, log_warning, log_error, log_header, log_success
 from langchain_huggingface import HuggingFaceEmbeddings
-from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 
@@ -22,21 +20,24 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 os.environ["SSL_CERT_FILE"] = certifi.where()
 os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 
+
 embeddings = HuggingFaceEmbeddings(
     model_name="BAAI/bge-large-en-v1.5",
     model_kwargs={"device": "mps"},
     encode_kwargs={"normalize_embeddings": True},
 )
+
 # vectorstore = Chroma(persist_directory="chroma_db", embedding_function=embeddings)
 vectorstore = PineconeVectorStore(
-    index_name="my-rag-index-gemini", embedding=embeddings
+    index_name="langchain-docs-helper-index", embedding=embeddings
 )
+
 tavily_extract = TavilyExtract()
 tavily_map = TavilyMap(max_depth=5, max_breadth=20)
 tavily_crawl = TavilyCrawl()
 
 
-async def index_documents_async(documents: List[Document], batch_size: int = 50):
+async def index_documents_async(documents: list[Document], batch_size: int = 50):
     """Process documents in batches asynchronously."""
     log_header("VECTOR STORAGE PHASE")
     log_info(
@@ -54,7 +55,7 @@ async def index_documents_async(documents: List[Document], batch_size: int = 50)
     )
 
     # Process all batches concurrently
-    async def add_batch(batch: List[Document], batch_num: int):
+    async def add_batch(batch: list[Document], batch_num: int):
         try:
             await vectorstore.aadd_documents(batch)
             log_success(

@@ -1,31 +1,40 @@
-from typing import Any, Dict
-
+from typing import Any
 from dotenv import load_dotenv
-from langchain.agents import create_agent
-from langchain.chat_models import init_chat_model
-from langchain.messages import ToolMessage
-from langchain.tools import tool
+from langchain_groq import ChatGroq
+from langchain_core.messages import ToolMessage
+from langchain_core.tools import tool
 from langchain_pinecone import PineconeVectorStore
-from langchain_openai import OpenAIEmbeddings
+from langchain.agents import create_agent
+from langchain_huggingface import HuggingFaceEmbeddings
 
 load_dotenv()
 
+
 # Initialize embeddings (same as ingestion.py)
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+embeddings = HuggingFaceEmbeddings(
+    model_name="BAAI/bge-large-en-v1.5",
+    model_kwargs={"device": "mps"},
+    encode_kwargs={"normalize_embeddings": True},
+)
 
 # Initialize vector store
 vectorstore = PineconeVectorStore(
-    index_name="langchain-docs-2026", embedding=embeddings
+    index_name="langchain-docs-helper-index", embedding=embeddings
 )
+
 # Initialize chat model
-model = init_chat_model("gpt-5.2", model_provider="openai")
+model = ChatGroq(
+    model="llama-3.1-8b-instant",
+    temperature=0.1,
+    max_tokens=512,
+)
 
 
 @tool(response_format="content_and_artifact")
 def retrieve_context(query: str):
     """Retrieve relevant documentation to help answer user queries about LangChain."""
-    # Retrieve top 4 most similar documents
-    retrieved_docs = vectorstore.as_retriever().invoke(query, k=4)
+    # Retrieve top 3 most similar documents
+    retrieved_docs = vectorstore.as_retriever().invoke(query, k=3)
 
     # Serialize documents for the model
     serialized = "\n\n".join(
@@ -39,7 +48,7 @@ def retrieve_context(query: str):
     return serialized, retrieved_docs
 
 
-def run_llm(query: str) -> Dict[str, Any]:
+def run_llm(query: str) -> dict[str, Any]:
     """
     Run the RAG pipeline to answer a query using retrieved documentation.
 
@@ -85,4 +94,10 @@ def run_llm(query: str) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     result = run_llm(query="what are deep agents?")
-    print(result)
+
+    print("\n=== Answer ===")
+    print(result["answer"])
+
+    print("\n=== Sources ===")
+    for doc in result["context"]:
+        print(f"- {doc.metadata.get('source', 'Unknown')}")
