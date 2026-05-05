@@ -10,7 +10,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 load_dotenv()
 
 
-# Initialize embeddings (same as ingestion.py)
+# Initialize embeddings
 embeddings = HuggingFaceEmbeddings(
     model_name="BAAI/bge-large-en-v1.5",
     model_kwargs={"device": "mps"},
@@ -24,7 +24,8 @@ vectorstore = PineconeVectorStore(
 
 # Initialize chat model
 model = ChatGroq(
-    model="llama-3.1-8b-instant",
+    # model="llama-3.1-8b-instant",
+    model="llama-3.3-70b-versatile",
     temperature=0.1,
     max_tokens=512,
 )
