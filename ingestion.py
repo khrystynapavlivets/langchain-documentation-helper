@@ -2,6 +2,7 @@ import asyncio
 import ssl
 import os
 import certifi
+import torch
 from dotenv import load_dotenv
 
 
@@ -20,10 +21,17 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 os.environ["SSL_CERT_FILE"] = certifi.where()
 os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 
+device = (
+    "cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
+    else "cpu"
+)
 
 embeddings = HuggingFaceEmbeddings(
     model_name="BAAI/bge-large-en-v1.5",
-    model_kwargs={"device": "mps"},
+    model_kwargs={"device": device},
     encode_kwargs={"normalize_embeddings": True},
 )
 
@@ -92,10 +100,9 @@ async def main():
         Colors.PURPLE,
     )
     # Crawl the documentation site
-
     res = tavily_crawl.invoke(
         {
-            "url": "https://python.langchain.com/",
+            "url": "https://python.langchain.com/docs/introduction/",
             "max_depth": 2,
             "extract_depth": "advanced",
         }
@@ -104,13 +111,21 @@ async def main():
     # Convert Tavily crawl results to LangChain Document objects
     all_docs = []
     for tavily_crawl_result_item in res["results"]:
+        url = tavily_crawl_result_item["url"]
+        
+        # Filter out invalid, template, or outdated URLs
+        invalid_patterns = ["${", "CHAT_APP_URL", "/oss/", "docs.langchain.com"]
+        if any(pattern in url for pattern in invalid_patterns):
+            log_warning(f"TavilyCrawl: Skipping invalid/outdated URL: {url}")
+            continue
+
         log_info(
-            f"TavilyCrawl: Successfully crawled {tavily_crawl_result_item['url']} from documentation site"
+            f"TavilyCrawl: Successfully crawled {url} from documentation site"
         )
         all_docs.append(
             Document(
                 page_content=tavily_crawl_result_item["raw_content"],
-                metadata={"source": tavily_crawl_result_item["url"]},
+                metadata={"source": url},
             )
         )
 

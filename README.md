@@ -1,85 +1,123 @@
-# 📘 Documentation Helper: LangChain RAG Assistant
+# 📘 LangChain Documentation Helper
 
-A modern, high-performance RAG (Retrieval-Augmented Generation) application designed to help developers navigate and query complex documentation—starting with **LangChain**. Built with Python, Streamlit, and advanced vector search capabilities.
+A high-performance RAG (Retrieval-Augmented Generation) application designed to crawl, index, and query complex documentation using advanced AI agents. Currently optimized for **LangChain** documentation.
+
+Built with modern Python tooling and state-of-the-art LLMs, this project provides a seamless chat interface for developers to get accurate answers with direct source citations.
 
 ---
 
-## ✨ Features
+## 🚀 Overview
 
-- **🔍 Smart Retrieval**: Uses Pinecone vector database for lightning-fast semantic search.
-- **🤖 AI-Powered Answers**: Leverages state-of-the-art LLMs to provide concise, context-aware answers.
-- **📚 Source Attribution**: Automatically cites sources from the documentation to ensure accuracy.
-- **🕸️ Intelligent Ingestion**: Automated pipeline using Tavily for crawling and extracting documentation.
-- **💬 Interactive UI**: Clean and intuitive chat interface built with Streamlit.
-- **🚀 Modern Tooling**: Managed by `uv` for ultra-fast dependency resolution and environment management.
+The system operates in two main phases:
+1. **Ingestion Pipeline**: Crawls documentation using Tavily, splits text into chunks, generates embeddings with HuggingFace, and stores them in a Pinecone vector database.
+2. **RAG Chat Interface**: A Streamlit-based UI where an AI agent (powered by Groq) retrieves relevant context from the vector store and generates answers with source attribution.
+
+---
+
+## ✨ Key Features
+
+- **🔍 Intelligent Retrieval**: Semantic search powered by Pinecone and BGE-large embeddings.
+- **🤖 Agentic RAG**: Uses LangChain agents to intelligently retrieve context before answering.
+- **⚡ Ultra-Fast LLM**: Powered by **Llama 3.3-70b** via **Groq** for near-instant responses.
+- **📚 Source Citing**: Every answer includes expandable sections with direct links to the source documentation.
+- **🕷️ Automated Ingestion**: Scalable pipeline with asynchronous indexing and web crawling.
+- **📦 Modern Tooling**: Managed by `uv` for lightning-fast dependency management and reproducible environments.
 
 ---
 
 ## 🛠️ Tech Stack
 
+- **Framework**: [LangChain](https://www.langchain.com/)
 - **Frontend**: [Streamlit](https://streamlit.io/)
-- **Orchestration**: [LangChain](https://www.langchain.com/)
-- **Vector Database**: [Pinecone](https://www.pinecone.io/)
-- **Embeddings**: OpenAI (`text-embedding-3-small`) / HuggingFace (`BAAI/bge-large-en-v1.5`)
-- **Web Crawling**: [Tavily AI](https://tavily.com/)
-- **Environment**: [uv](https://github.com/astral-sh/uv)
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- [uv](https://github.com/astral-sh/uv) installed on your system.
-- API Keys for:
-  - OpenAI
-  - Pinecone
-  - Tavily AI
-
-### Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone <your-repo-url>
-   cd documentation-helper
-   ```
-
-2. **Set up environment variables**:
-   Create a `.env` file in the root directory:
-   ```env
-   OPENAI_API_KEY=your_openai_key
-   PINECONE_API_KEY=your_pinecone_key
-   TAVILY_API_KEY=your_tavily_key
-   ```
-
-3. **Install dependencies**:
-   ```bash
-   uv sync
-   ```
-
----
-
-## 📖 Usage
-
-### 1. Ingest Documentation
-To populate the vector store with the latest documentation:
-```bash
-uv run ingestion.py
-```
-
-### 2. Run the Application
-Launch the Streamlit chat interface:
-```bash
-uv run streamlit run main.py
-```
+- **LLM Provider**: [Groq](https://groq.com/) (Llama 3.3 70B)
+- **Embeddings**: [HuggingFace](https://huggingface.co/) (`BAAI/bge-large-en-v1.5`)
+- **Vector DB**: [Pinecone](https://www.pinecone.io/)
+- **Search/Crawl**: [Tavily AI](https://tavily.com/)
+- **Package Manager**: [uv](https://github.com/astral-sh/uv)
 
 ---
 
 ## 📂 Project Structure
 
-- `main.py`: Entry point for the Streamlit application.
-- `ingestion.py`: Pipeline for crawling and indexing documentation.
-- `backend/core.py`: Core RAG logic and LLM integration.
-- `consts.py`: Global constants and configurations.
-- `logger.py`: Custom logging utility for better visibility.
+```text
+├── backend/
+│   ├── core.py         # RAG logic, Agent setup & LLM integration
+│   └── __init__.py
+├── main.py             # Streamlit UI & Chat Interface
+├── ingestion.py        # Async data ingestion & vector indexing pipeline
+├── consts.py           # Global constants & configurations
+├── logger.py           # Custom logging utility
+├── pyproject.toml      # Project metadata & dependencies
+└── .env                # Environment variables (local only)
+```
+
+---
+
+## 🏁 Getting Started
+
+### Prerequisites
+
+- **Python 3.14+** (as specified in `pyproject.toml`)
+- **[uv](https://github.com/astral-sh/uv)** installed (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
+- API Keys for:
+  - **Groq** (for LLM)
+  - **Pinecone** (for Vector DB)
+  - **Tavily** (for crawling)
+
+### 1. Clone & Setup
+
+```bash
+git clone <your-repo-url>
+cd documentation-helper
+```
+
+### 2. Environment Configuration
+
+Create a `.env` file in the root directory:
+
+```env
+GROQ_API_KEY=your_groq_key
+PINECONE_API_KEY=your_pinecone_key
+TAVILY_API_KEY=your_tavily_key
+```
+
+### 3. Install Dependencies
+
+```bash
+uv sync
+```
+
+---
+
+## 📖 Usage
+
+### Phase 1: Ingest Data
+Before chatting, you need to populate the vector store:
+
+```bash
+uv run ingestion.py
+```
+*This will crawl the documentation, generate embeddings, and upload them to Pinecone.*
+
+### Phase 2: Run Chat UI
+Launch the application:
+
+```bash
+uv run streamlit run main.py
+```
+Open your browser at `http://localhost:8501`.
+
+---
+
+## 🛠️ Development
+
+- **Formatting**: Uses `black` and `isort`.
+- **Logging**: Detailed color-coded logs are provided during ingestion for debugging.
+- **Hardware**: Automatically detects and uses `CUDA`, `MPS` (Mac M-series), or `CPU` for embedding generation.
+
+---
+
+## 📜 License
+
+MIT License - feel free to use and modify for your own projects.
 
