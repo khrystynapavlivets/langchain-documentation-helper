@@ -103,7 +103,7 @@ async def main():
     res = tavily_crawl.invoke(
         {
             "url": "https://python.langchain.com/docs/introduction/",
-            "max_depth": 2,
+            "max_depth": 3,
             "extract_depth": "advanced",
         }
     )
@@ -113,10 +113,15 @@ async def main():
     for tavily_crawl_result_item in res["results"]:
         url = tavily_crawl_result_item["url"]
         
-        # Filter out invalid, template, or outdated URLs
-        invalid_patterns = ["${", "CHAT_APP_URL", "/oss/", "docs.langchain.com"]
+        # Filter out invalid, template, or outdated URLs, and non-technical pages
+        invalid_patterns = [
+            "${", "CHAT_APP_URL", "/oss/", "docs.langchain.com",
+            "/legal/", "/privacy", "/careers", "/forum", "/academy",
+            "/changelog", "/support", "status.smith", "trust.langchain",
+            "blog.langchain", "interrupt.langchain"
+        ]
         if any(pattern in url for pattern in invalid_patterns):
-            log_warning(f"TavilyCrawl: Skipping invalid/outdated URL: {url}")
+            log_warning(f"TavilyCrawl: Skipping non-technical or outdated URL: {url}")
             continue
 
         log_info(
