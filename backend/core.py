@@ -15,9 +15,7 @@ load_dotenv()
 device = (
     "cuda"
     if torch.cuda.is_available()
-    else "mps"
-    if torch.backends.mps.is_available()
-    else "cpu"
+    else "mps" if torch.backends.mps.is_available() else "cpu"
 )
 
 embeddings = HuggingFaceEmbeddings(
@@ -32,11 +30,7 @@ vectorstore = PineconeVectorStore(
 )
 
 # Initialize chat model
-model = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    temperature=0.1,
-    max_tokens=1024
-)
+model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.1, max_tokens=1024)
 
 
 @tool(response_format="content_and_artifact")
@@ -47,9 +41,7 @@ def retrieve_context(query: str):
 
     # Serialize documents for the model
     serialized = "\n\n".join(
-        (
-            f"URL: {doc.metadata.get('source', 'Unknown')}\n\nContent: {doc.page_content}"
-        )
+        (f"URL: {doc.metadata.get('source', 'Unknown')}\n\nContent: {doc.page_content}")
         for doc in retrieved_docs
     )
 

@@ -6,11 +6,17 @@ from backend.core import run_llm
 
 
 def _format_sources(context_docs: List[Any]) -> List[str]:
-    return sorted(list(set([
-        str((meta.get("source") or "Unknown"))
-        for doc in (context_docs or [])
-        if (meta := (getattr(doc, "metadata", None) or {})) is not None
-    ])))
+    return sorted(
+        list(
+            set(
+                [
+                    str((meta.get("source") or "Unknown"))
+                    for doc in (context_docs or [])
+                    if (meta := (getattr(doc, "metadata", None) or {})) is not None
+                ]
+            )
+        )
+    )
 
 
 st.set_page_config(page_title="LangChain Documentation Helper", layout="centered")
