@@ -1,3 +1,4 @@
+import torch
 from typing import Any
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
@@ -11,9 +12,17 @@ load_dotenv()
 
 
 # Initialize embeddings
+device = (
+    "cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
+    else "cpu"
+)
+
 embeddings = HuggingFaceEmbeddings(
     model_name="BAAI/bge-large-en-v1.5",
-    model_kwargs={"device": "mps"},
+    model_kwargs={"device": device},
     encode_kwargs={"normalize_embeddings": True},
 )
 
@@ -24,10 +33,9 @@ vectorstore = PineconeVectorStore(
 
 # Initialize chat model
 model = ChatGroq(
-    model="llama-3.1-8b-instant",
-    # model="llama-3.3-70b-versatile",
+    model="llama-3.3-70b-versatile",
     temperature=0.1,
-    max_tokens=512,
+    max_tokens=1024
 )
 
 
@@ -40,7 +48,7 @@ def retrieve_context(query: str):
     # Serialize documents for the model
     serialized = "\n\n".join(
         (
-            f"Source: {doc.metadata.get('source', 'Unknown')}\n\nContent: {doc.page_content}"
+            f"URL: {doc.metadata.get('source', 'Unknown')}\n\nContent: {doc.page_content}"
         )
         for doc in retrieved_docs
     )
