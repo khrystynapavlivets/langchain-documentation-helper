@@ -17,10 +17,11 @@ The system operates in two main phases:
 ## ✨ Key Features
 
 - **🔍 Intelligent Retrieval**: Semantic search powered by Pinecone and BGE-large embeddings.
+- **🚀 Hardware Accelerated**: Automatic support for **CUDA** (Nvidia), **MPS** (Apple Silicon), or CPU for embedding generation.
 - **🤖 Agentic RAG**: Uses LangChain agents to intelligently retrieve context before answering.
 - **⚡ Ultra-Fast LLM**: Powered by **Llama 3.3-70b** via **Groq** for near-instant responses.
 - **📚 Source Citing**: Every answer includes expandable sections with direct links to the source documentation.
-- **🕷️ Automated Ingestion**: Scalable pipeline with asynchronous indexing and web crawling.
+- **🧹 Session Management**: Built-in chat history management with the ability to clear sessions.
 - **📦 Modern Tooling**: Managed by `uv` for lightning-fast dependency management and reproducible environments.
 
 ---
@@ -58,7 +59,8 @@ The system operates in two main phases:
 ### Prerequisites
 
 - **Python 3.14+** (as specified in `pyproject.toml`)
-- **[uv](https://github.com/astral-sh/uv)** installed (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
+- **[uv](https://github.com/astral-sh/uv)** installed
+- **Pinecone Index**: Create an index named `langchain-docs-helper-index` with **1024 dimensions** (for BGE-large).
 - API Keys for:
   - **Groq** (for LLM)
   - **Pinecone** (for Vector DB)
@@ -97,7 +99,7 @@ Before chatting, you need to populate the vector store:
 ```bash
 uv run ingestion.py
 ```
-*This will crawl the documentation, generate embeddings, and upload them to Pinecone.*
+*This will crawl the LangChain documentation, split it into chunks (size: 2000, overlap: 200), generate embeddings, and upload them to Pinecone.*
 
 ### Phase 2: Run Chat UI
 Launch the application:
